@@ -1,9 +1,0 @@
-schemaVersion: "2.0.0"
-name: wildfly-test
-repositories:
-  - id: "central"
-    url: "https://repo1.maven.org/maven2/"
-  - id: "jboss-public"
-    url: "https://repository.jboss.org/nexus/content/groups/public/"
-manifest:
-  url: "file:examples/wildfly-27.0.0.Alpha2-manifest.yaml"
