@@ -30,6 +30,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class ProsperoMetadataUtils {
 
@@ -119,8 +122,30 @@ public class ProsperoMetadataUtils {
             throw new IllegalArgumentException(String.format("The target path %s does not exist.", channelPath.getParent()));
         }
 
+        final Set<String> definedChannelNames = channels.stream().map(Channel::getName).filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.toSet());
+        final AtomicInteger counter = new AtomicInteger(0);
+        final List<Channel> namedChannels = channels.stream().map(c -> {
+            final String name;
+            if (c.getName() == null || c.getName().isEmpty()) {
+                name = nextAvailableName(c, counter, definedChannelNames);
+            } else {
+                name = c.getName();
+            }
+            return new Channel(c.getSchemaVersion(), name, c.getDescription(), c.getVendor(), c.getRepositories(), c.getManifestCoordinate(),
+                    c.getBlocklistCoordinate(), c.getNoStreamStrategy());
+        }).collect(Collectors.toList());
 
-        writeToFile(channelPath, ChannelMapper.toYaml(channels));
+
+        writeToFile(channelPath, ChannelMapper.toYaml(namedChannels));
+    }
+
+    private static String nextAvailableName(Channel c, AtomicInteger counter, Set<String> definedChannelNames) {
+        String name;
+        do {
+            name = (c.getName() == null || c.getName().isEmpty()) ? "channel-" + counter.getAndIncrement() : c.getName();
+        } while (definedChannelNames.contains(name));
+        definedChannelNames.add(name);
+        return name;
     }
 
     /**
