@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
@@ -128,7 +129,7 @@ public class ProsperoMetadataUtilsTest {
 
         ProsperoMetadataUtils.generate(server, List.of(A_CHANNEL), A_MANIFEST, null);
 
-        Assertions.assertThat(server.resolve(METADATA_DIR).resolve(PROVISIONING_RECORD_XML))
+        assertThat(server.resolve(METADATA_DIR).resolve(PROVISIONING_RECORD_XML))
                 .hasContent("<provisioning></provisioning>");
     }
 
@@ -141,8 +142,30 @@ public class ProsperoMetadataUtilsTest {
 
         ProsperoMetadataUtils.generate(server, List.of(A_CHANNEL), A_MANIFEST, null);
 
-        Assertions.assertThat(server.resolve(METADATA_DIR).resolve(PROVISIONING_RECORD_XML))
+        assertThat(server.resolve(METADATA_DIR).resolve(PROVISIONING_RECORD_XML))
                 .hasContent("<provisioning></provisioning>");
+    }
+
+    @Test
+    public void generateChannelNamesIfNotProvided() throws Exception {
+        Files.createDirectory(server.resolve(Constants.PROVISIONED_STATE_DIR));
+        Files.writeString(server.resolve(Constants.PROVISIONED_STATE_DIR).resolve(Constants.PROVISIONING_XML), "<provisioning></provisioning>");
+        Files.createDirectory(server.resolve(METADATA_DIR));
+        Files.writeString(server.resolve(METADATA_DIR).resolve(PROVISIONING_RECORD_XML), "<provisioning>content</provisioning>");
+
+        final Channel channelNoName = new Channel(null, null, null,
+                List.of(new Repository("test-repo", "http://test.te")),
+                new ChannelManifestCoordinate("foo", "bar"), null, null);
+        final Channel channelZero = new Channel("channel-0", null, null,
+                List.of(new Repository("test-repo", "http://test.te")),
+                new ChannelManifestCoordinate("foo", "bar"), null, null);
+
+        ProsperoMetadataUtils.generate(server, List.of(channelNoName, channelZero), A_MANIFEST, null);
+
+        final List<Channel> channels = ChannelMapper.fromString(Files.readString(server.resolve(METADATA_DIR).resolve(INSTALLER_CHANNELS_FILE_NAME)));
+        assertThat(channels)
+                .map(Channel::getName)
+                .containsExactlyInAnyOrder("channel-0", "channel-1");
     }
 
     private void assertMetadataWritten() throws MalformedURLException {
