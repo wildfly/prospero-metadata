@@ -122,17 +122,18 @@ public class ProsperoMetadataUtils {
             throw new IllegalArgumentException(String.format("The target path %s does not exist.", channelPath.getParent()));
         }
 
+        // prospero requires the channel names to be present in order for the users to be able to refer them in CLI operations
+        // if the passed channel does not define a name, try to generate one in a format of channel-X.
         final Set<String> definedChannelNames = channels.stream().map(Channel::getName).filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.toSet());
         final AtomicInteger counter = new AtomicInteger(0);
         final List<Channel> namedChannels = channels.stream().map(c -> {
-            final String name;
             if (c.getName() == null || c.getName().isEmpty()) {
-                name = nextAvailableName(c, counter, definedChannelNames);
+                final String name = nextAvailableName(c, counter, definedChannelNames);
+                return new Channel(c.getSchemaVersion(), name, c.getDescription(), c.getVendor(), c.getRepositories(), c.getManifestCoordinate(),
+                        c.getBlocklistCoordinate(), c.getNoStreamStrategy());
             } else {
-                name = c.getName();
+                return c;
             }
-            return new Channel(c.getSchemaVersion(), name, c.getDescription(), c.getVendor(), c.getRepositories(), c.getManifestCoordinate(),
-                    c.getBlocklistCoordinate(), c.getNoStreamStrategy());
         }).collect(Collectors.toList());
 
 
