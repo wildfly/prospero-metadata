@@ -129,8 +129,9 @@ public class ProsperoMetadataUtils {
         final List<Channel> namedChannels = channels.stream().map(c -> {
             if (c.getName() == null || c.getName().isEmpty()) {
                 final String name = nextAvailableName(c, counter, definedChannelNames);
-                return new Channel(c.getSchemaVersion(), name, c.getDescription(), c.getVendor(), c.getRepositories(), c.getManifestCoordinate(),
-                        c.getBlocklistCoordinate(), c.getNoStreamStrategy());
+                return new Channel.Builder(c)
+                        .setName(name)
+                        .build();
             } else {
                 return c;
             }
