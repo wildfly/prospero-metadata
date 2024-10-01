@@ -30,6 +30,7 @@ import org.wildfly.channel.ChannelManifestMapper;
 import org.wildfly.channel.Repository;
 import org.wildfly.channel.maven.VersionResolverFactory;
 import org.wildfly.channel.spi.MavenVersionsResolver;
+import org.wildfly.channel.spi.SignatureValidator;
 import org.wildfly.channel.version.VersionMatcher;
 
 import java.io.ByteArrayOutputStream;
@@ -62,11 +63,15 @@ public class ManifestVersionResolver {
      * @param system
      */
     public ManifestVersionResolver(Path localMavenCache, RepositorySystem system) {
+        this(localMavenCache, system, null);
+    }
+
+    public ManifestVersionResolver(Path localMavenCache, RepositorySystem system, SignatureValidator signatureValidator) {
         Objects.requireNonNull(localMavenCache);
         Objects.requireNonNull(system);
 
         final DefaultRepositorySystemSession session = newRepositorySystemSession(system, localMavenCache);
-        this.resolverFactory = new VersionResolverFactory(system, session);
+        this.resolverFactory = new VersionResolverFactory(system, session, signatureValidator);
     }
 
     // used in tests only
@@ -96,14 +101,14 @@ public class ManifestVersionResolver {
                 final ChannelManifest manifest = ChannelManifestMapper.from(manifestCoordinate.getUrl());
                 manifestVersionRecord.addManifest(new ManifestVersionRecord.UrlManifest(manifestCoordinate.getUrl().toExternalForm(), hashCode, manifest.getName()));
             } else if (manifestCoordinate.getVersion() != null) {
-                final String description = getManifestDescription(manifestCoordinate, resolverFactory.create(channel.getRepositories()));
+                final String description = getManifestDescription(manifestCoordinate, resolverFactory.create(channel));
                 manifestVersionRecord.addManifest(new ManifestVersionRecord.MavenManifest(
                         manifestCoordinate.getGroupId(),
                         manifestCoordinate.getArtifactId(),
                         manifestCoordinate.getVersion(),
                         description));
             } else {
-                final MavenVersionsResolver mavenVersionsResolver = resolverFactory.create(channel.getRepositories());
+                final MavenVersionsResolver mavenVersionsResolver = resolverFactory.create(channel);
                 final Optional<String> latestVersion = VersionMatcher.getLatestVersion(mavenVersionsResolver.getAllVersions(manifestCoordinate.getGroupId(), manifestCoordinate.getArtifactId(),
                         manifestCoordinate.getExtension(), manifestCoordinate.getClassifier()));
                 if (latestVersion.isPresent()) {
