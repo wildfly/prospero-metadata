@@ -69,7 +69,7 @@ public class ManifestVersionResolverTest {
 
         final File manifestFile = temp.newFile();
         final URL url = manifestFile.toURI().toURL();
-        Files.writeString(manifestFile.toPath(), ChannelManifestMapper.toYaml(new ChannelManifest("test", null, null, Collections.emptyList())));
+        Files.writeString(manifestFile.toPath(), ChannelManifestMapper.toYaml(new ChannelManifest("1.0.0", "test", null, null, null, null, Collections.emptyList())));
 
         when(mavenResolver.getAllVersions("org.test", "test", "yaml", "manifest"))
                 .thenReturn(Set.of("1.0.0", "1.0.1"));
@@ -86,6 +86,33 @@ public class ManifestVersionResolverTest {
         assertThat(currentVersions.getMavenManifests())
                 .map(ManifestVersionRecord.MavenManifest::getDescription)
                 .containsExactly("test");
+        assertThat(currentVersions.getOpenManifests()).isEmpty();
+        assertThat(currentVersions.getUrlManifests()).isEmpty();
+    }
+
+    @Test
+    public void getVersionOfLatestMavenManifestWithLogicalVersion() throws Exception {
+        final ManifestVersionResolver resolver = new ManifestVersionResolver(factory);
+
+        final File manifestFile = temp.newFile();
+        final URL url = manifestFile.toURI().toURL();
+        Files.writeString(manifestFile.toPath(), ChannelManifestMapper.toYaml(new ChannelManifest("1.1.0", "test", null, "logical-version", null, null, Collections.emptyList())));
+
+        when(mavenResolver.getAllVersions("org.test", "test", "yaml", "manifest"))
+                .thenReturn(Set.of("1.0.0", "1.0.1"));
+        when(mavenResolver.resolveChannelMetadata(any()))
+                .thenReturn(List.of(url));
+
+        final Channel channel = new Channel("test", "", null, Collections.emptyList(),
+                new ChannelManifestCoordinate("org.test", "test"), null, null);
+        final ManifestVersionRecord currentVersions = resolver.getCurrentVersions(List.of(channel));
+
+        assertThat(currentVersions.getMavenManifests())
+                .map(ManifestVersionRecord.MavenManifest::getVersion)
+                .containsExactly("1.0.1");
+        assertThat(currentVersions.getMavenManifests())
+                .map(ManifestVersionRecord.MavenManifest::getDescription)
+                .containsExactly("logical-version");
         assertThat(currentVersions.getOpenManifests()).isEmpty();
         assertThat(currentVersions.getUrlManifests()).isEmpty();
     }
@@ -198,8 +225,12 @@ public class ManifestVersionResolverTest {
                 .addRepository("test-repo", "http://test.te")
                 .build();
 
-        final ChannelManifest manifest1 = new ChannelManifest.Builder().setDescription("Manifest 1").build();
-        final ChannelManifest manifest2 = new ChannelManifest.Builder().setDescription("Manifest 2").build();
+        final ChannelManifest manifest1 = new ChannelManifest.Builder()
+                .setSchemaVersion(ChannelManifestMapper.SCHEMA_VERSION_1_0_0)
+                .setName("Manifest 1").build();
+        final ChannelManifest manifest2 = new ChannelManifest.Builder()
+                .setSchemaVersion(ChannelManifestMapper.SCHEMA_VERSION_1_0_0)
+                .setName("Manifest 2").build();
 
         final List<RuntimeChannel> channels = List.of(
                 new RuntimeChannel(channel1, manifest1, null),

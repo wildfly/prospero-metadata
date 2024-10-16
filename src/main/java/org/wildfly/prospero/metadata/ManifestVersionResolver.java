@@ -73,9 +73,9 @@ public class ManifestVersionResolver {
                 record.addManifest(new ManifestVersionRecord.NoManifest(repos, channelDefinition.getNoStreamStrategy().toString()));
             } else if (manifestCoordinate.getUrl() != null) {
                 String hashCode = HashUtils.hash(read(manifestCoordinate.getUrl()));
-                record.addManifest(new ManifestVersionRecord.UrlManifest(manifestCoordinate.getUrl().toExternalForm(), hashCode, manifest.getDescription()));
+                record.addManifest(new ManifestVersionRecord.UrlManifest(manifestCoordinate.getUrl().toExternalForm(), hashCode, getVersionDescription(manifest)));
             } else if (manifestCoordinate.getMaven() != null) {
-                final String description = manifest.getDescription();
+                final String description = getVersionDescription(manifest);
                 record.addManifest(new ManifestVersionRecord.MavenManifest(
                         manifestCoordinate.getGroupId(),
                         manifestCoordinate.getArtifactId(),
@@ -163,14 +163,26 @@ public class ManifestVersionResolver {
         return manifestVersionRecord;
     }
 
-    private String getManifestDescription(ChannelManifestCoordinate manifestCoordinate, MavenVersionsResolver mavenVersionsResolver) {
+    private static String getManifestDescription(ChannelManifestCoordinate manifestCoordinate, MavenVersionsResolver mavenVersionsResolver) {
         final List<URL> urls = mavenVersionsResolver.resolveChannelMetadata(List.of(manifestCoordinate));
         final String description;
         if (!urls.isEmpty()) {
             final ChannelManifest manifest = ChannelManifestMapper.from(urls.get(0));
-            description = manifest.getName();
+            description = getVersionDescription(manifest);
         } else {
             description = null;
+        }
+        return description;
+    }
+
+    private static String getVersionDescription(ChannelManifest manifest) {
+        final String description;
+        if (manifest.getSchemaVersion().equals(ChannelManifestMapper.SCHEMA_VERSION_1_0_0)) {
+            // before manifest v1.1.0, we had a convention of using "name" as version description
+            // after "logicalVersion" was introduced, this was abandoned
+            description = manifest.getName();
+        } else {
+            description = manifest.getLogicalVersion();
         }
         return description;
     }
