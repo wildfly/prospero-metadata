@@ -1,6 +1,6 @@
 ## Prospero metadata
 
-This project is part of [Prospero project](https://raw.githubusercontent.com/wildfly-extras/prospero/) and provides the API to create the installation metadata used by Prospero to manager and update WildFly servers.
+This project is part of [Prospero project](https://github.com/wildfly/prospero/) and provides the API to create the installation metadata used by Prospero to manager and update WildFly servers.
 
 ## Building
 

@@ -15,9 +15,9 @@
     <packaging>jar</packaging>
 
     <scm>
-        <connection>scm:git:git@github.com:wildfly-extras/prospero-metadata.git</connection>
-        <developerConnection>scm:git:git@github.com:wildfly-extras/prospero-metadata.git</developerConnection>
-        <url>https://github.com/wildfly-extras/prospero-metadata</url>
+        <connection>scm:git:git@github.com:wildfly/prospero-metadata.git</connection>
+        <developerConnection>scm:git:git@github.com:wildfly/prospero-metadata.git</developerConnection>
+        <url>https://github.com/wildfly/prospero-metadata</url>
         <tag>HEAD</tag>
     </scm>
 
