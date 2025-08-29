@@ -53,6 +53,7 @@
         <version.org.wildfly.checkstyle-config>1.0.8.Final</version.org.wildfly.checkstyle-config>
 
         <!-- Repository Deployment Settings -->
+        <nexus.repository.staging>wildfly-staging</nexus.repository.staging>
         <nexus.staging.tag>prospero-metadata-${project.version}</nexus.staging.tag>
     </properties>
 
