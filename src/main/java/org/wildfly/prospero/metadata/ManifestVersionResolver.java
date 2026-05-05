@@ -30,6 +30,7 @@ import org.wildfly.channel.ChannelManifestMapper;
 import org.wildfly.channel.ChannelSession;
 import org.wildfly.channel.Repository;
 import org.wildfly.channel.RuntimeChannel;
+import org.wildfly.channel.UrlContentLoader;
 import org.wildfly.channel.maven.VersionResolverFactory;
 import org.wildfly.channel.spi.MavenVersionsResolver;
 import org.wildfly.channel.version.VersionMatcher;
@@ -188,7 +189,7 @@ public class ManifestVersionResolver {
     }
 
     private static String read(URL url) throws IOException {
-        try(InputStream inputStream = url.openStream();
+        try(InputStream inputStream = UrlContentLoader.openStream(url);
             OutputStream outputStream = new ByteArrayOutputStream()) {
             inputStream.transferTo(outputStream);
             return outputStream.toString();
