@@ -13,11 +13,9 @@ To build with your own Maven installation:
 
 ## Release Procedure
 
-# Releasing Remoting JMX
-
 Prior to releasing you should ensure you have your own GPG signing key set up, published to a key server and listed on [wildfly.org](https://www.wildfly.org/contributors/pgp/).
 
-## Prepare the release
+### Prepare the release
 
 Execute:
 
@@ -25,7 +23,7 @@ Execute:
 mvn release:prepare -Pjboss-release
 ```
 
-## Perform the release
+### Perform the release
 
 Execute:
 
@@ -45,7 +43,7 @@ e.g.
 
 If others are also deploying at the same time this count could be higher, the important check is that the scan was at least 10 minutes after it was deployed, 1 or more components were scanned and no errors specific to Remoting JMX are reported.
 
-## Complete the release
+### Complete the release
 
 If no issues are reported complete the release.
 
@@ -57,6 +55,7 @@ mvn nxrm3:staging-move
 ```
 
 Once this is done, the release will be pushed to the `releases` repository in Nexus and then to Maven Central.
+
 ## License
 
 * [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
