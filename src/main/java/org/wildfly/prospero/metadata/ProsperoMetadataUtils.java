@@ -130,7 +130,7 @@ public class ProsperoMetadataUtils {
             if (c.getName() == null || c.getName().isEmpty()) {
                 final String name = nextAvailableName(c, counter, definedChannelNames);
                 return new Channel(c.getSchemaVersion(), name, c.getDescription(), c.getVendor(), c.getRepositories(), c.getManifestCoordinate(),
-                        c.getBlocklistCoordinate(), c.getNoStreamStrategy());
+                        c.getBlocklistCoordinate(), c.getNoStreamStrategy(), null, null);
             } else {
                 return c;
             }

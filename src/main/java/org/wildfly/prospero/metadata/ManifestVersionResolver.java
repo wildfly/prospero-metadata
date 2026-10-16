@@ -132,14 +132,14 @@ public class ManifestVersionResolver {
                 final ChannelManifest manifest = ChannelManifestMapper.from(manifestCoordinate.getUrl());
                 manifestVersionRecord.addManifest(new ManifestVersionRecord.UrlManifest(manifestCoordinate.getUrl().toExternalForm(), hashCode, manifest.getName()));
             } else if (manifestCoordinate.getVersion() != null) {
-                final String description = getManifestDescription(manifestCoordinate, resolverFactory.create(channel.getRepositories()));
+                final String description = getManifestDescription(manifestCoordinate, resolverFactory.create(channel));
                 manifestVersionRecord.addManifest(new ManifestVersionRecord.MavenManifest(
                         manifestCoordinate.getGroupId(),
                         manifestCoordinate.getArtifactId(),
                         manifestCoordinate.getVersion(),
                         description));
             } else {
-                final MavenVersionsResolver mavenVersionsResolver = resolverFactory.create(channel.getRepositories());
+                final MavenVersionsResolver mavenVersionsResolver = resolverFactory.create(channel);
                 final Optional<String> latestVersion = VersionMatcher.getLatestVersion(mavenVersionsResolver.getAllVersions(manifestCoordinate.getGroupId(), manifestCoordinate.getArtifactId(),
                         manifestCoordinate.getExtension(), manifestCoordinate.getClassifier()));
                 if (latestVersion.isPresent()) {
